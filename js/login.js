@@ -209,15 +209,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1500);
                 
             } else {
-                // Handle errors
-                const errorMessage = getErrorMessage(response);
-                
+                // Handle authentication errors
                 if (response.status === 401) {
                     showError(emailInput, emailError, 'Credenciais inválidas');
                     showError(passwordInput, passwordError, 'Credenciais inválidas');
+                    showToast('Credenciais inválidas!', 'error');
+                } else {
+                    // For other errors, use generic message with code
+                    const errorMessage = getErrorMessage(response);
+                    showToast(errorMessage, 'error');
                 }
-                
-                showToast(errorMessage, 'error');
                 
                 // Re-enable button
                 submitButton.disabled = false;

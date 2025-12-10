@@ -192,16 +192,23 @@ function getErrorMessage(response) {
     if (backendMessage) {
         // Lista de mensagens que devem ser mostradas completas
         const specificErrors = [
+            'invalid email or password',     // Backend em inglês
             'senha incorreta',
             'credenciais inválidas',
             'usuário não encontrado',
             'email já cadastrado',
+            'email already registered',      // Backend em inglês
             'senha atual incorreta',
             'token inválido',
+            'invalid token',                 // Backend em inglês
+            'token has expired',             // Backend em inglês
             'sessão expirada',
             'tarefa não encontrada',
+            'task not found',                // Backend em inglês
             'título é obrigatório',
-            'status inválido'
+            'title is required',             // Backend em inglês
+            'status inválido',
+            'invalid status'                 // Backend em inglês
         ];
         
         const lowerMessage = backendMessage.toLowerCase();
