@@ -171,6 +171,413 @@ Alterna entre claro e escuro:
 - CSS Variables para fácil customização
 - Transições suaves entre temas
 
+## 📋 Requisitos Funcionais
+
+### 1. Autenticação e Gestão de Usuários
+
+#### RF-001: Cadastro de Usuário
+**Endpoint**: `POST /api/auth/register`
+
+**Descrição**: Permite que novos usuários criem uma conta no sistema.
+
+**Dados de Entrada**:
+- `email` (obrigatório): E-mail válido e único
+- `password` (obrigatório): Senha com mínimo de 6 caracteres
+- `name` (obrigatório): Nome completo do usuário
+
+**Regras de Negócio**:
+- Email deve ser único no sistema
+- Senha deve ter no mínimo 6 caracteres
+- Senha é armazenada com hash bcrypt
+- Email e nome não podem ser vazios
+
+**Dados de Saída**:
+- Token JWT de autenticação
+- Dados do usuário (id, email, name)
+- Mensagem de sucesso
+
+---
+
+#### RF-002: Login de Usuário
+**Endpoint**: `POST /api/auth/login`
+
+**Descrição**: Permite que usuários autentiquem-se no sistema.
+
+**Dados de Entrada**:
+- `email` (obrigatório): E-mail cadastrado
+- `password` (obrigatório): Senha do usuário
+
+**Regras de Negócio**:
+- Credenciais devem corresponder a um usuário existente
+- Senha é verificada com bcrypt
+- Token JWT é gerado com validade de 24 horas
+
+**Funcionalidade Frontend**:
+- Opção "Lembrar-me" (persistência de sessão)
+- Validação de formulário em tempo real
+- Exibição de senhas com toggle
+- Entrada como visitante (demo)
+
+---
+
+#### RF-003: Recuperação de Dados do Usuário
+**Endpoint**: `GET /api/auth/me`
+
+**Descrição**: Retorna informações do usuário autenticado.
+
+**Autenticação**: Token JWT obrigatório
+
+**Dados de Saída**:
+- `id`: ID do usuário
+- `email`: E-mail do usuário
+- `name`: Nome do usuário
+- `created_at`: Data de criação da conta
+
+---
+
+#### RF-004: Atualização de Perfil
+**Endpoint**: `PUT /api/auth/profile`
+
+**Descrição**: Permite que o usuário atualize seus dados de perfil.
+
+**Dados de Entrada**:
+- `name` (obrigatório): Novo nome
+- `email` (obrigatório): Novo email
+- `current_password` (opcional): Senha atual (para trocar senha)
+- `new_password` (opcional): Nova senha
+
+**Funcionalidade Frontend**:
+- Página de configurações dedicada
+- Validação de senha atual antes de alterar
+- Confirmação de nova senha
+- Feedback visual para cada campo
+
+---
+
+### 2. Gestão de Tarefas
+
+#### RF-005: Listar Todas as Tarefas
+**Endpoint**: `GET /api/tasks`
+
+**Descrição**: Retorna todas as tarefas do usuário autenticado.
+
+**Dados de Saída**:
+- Lista de tarefas com:
+  - `id`: ID único da tarefa
+  - `title`: Título da tarefa
+  - `status`: Status atual (pending, in_progress, completed)
+  - `created_at`: Data de criação
+  - `completed_at`: Data de conclusão (se aplicável)
+
+**Funcionalidade Frontend**:
+- Exibição em lista com cards
+- Filtros por status (abas)
+- Contador de tarefas por categoria
+- Estado vazio quando não há tarefas
+
+---
+
+#### RF-006: Buscar Tarefa Específica
+**Endpoint**: `GET /api/tasks/:id`
+
+**Descrição**: Retorna detalhes de uma tarefa específica.
+
+**Regras de Negócio**:
+- Tarefa deve pertencer ao usuário autenticado
+- ID deve existir no banco de dados
+
+---
+
+#### RF-007: Criar Nova Tarefa
+**Endpoint**: `POST /api/tasks`
+
+**Descrição**: Cria uma nova tarefa para o usuário autenticado.
+
+**Dados de Entrada**:
+- `title` (obrigatório): Título da tarefa (máx. 200 caracteres)
+- `status` (opcional): Status inicial (padrão: 'pending')
+
+**Regras de Negócio**:
+- Título não pode ser vazio
+- Título limitado a 200 caracteres
+- Status padrão é 'pending' se não informado
+- Data de criação gerada automaticamente
+
+**Funcionalidade Frontend**:
+- Input com placeholder e ícone
+- Limite de 100 caracteres visível
+- Validação em tempo real
+- Feedback toast após criação
+- Adição instantânea à lista
+
+---
+
+#### RF-008: Atualizar Tarefa
+**Endpoint**: `PUT /api/tasks/:id`
+
+**Descrição**: Atualiza o título de uma tarefa existente.
+
+**Dados de Entrada**:
+- `title` (obrigatório): Novo título da tarefa
+
+**Funcionalidade Frontend**:
+- Modo de edição inline
+- Botões de confirmar/cancelar
+- Preservação do estado anterior ao cancelar
+- Feedback visual após atualização
+
+---
+
+#### RF-009: Atualizar Status da Tarefa
+**Endpoint**: `PUT /api/tasks/:id/status`
+
+**Descrição**: Atualiza apenas o status de uma tarefa.
+
+**Dados de Entrada**:
+- `status` (obrigatório): Novo status (pending, in_progress, completed)
+
+**Regras de Negócio**:
+- Ao marcar como 'completed', `completed_at` é preenchido automaticamente
+- Ao desmarcar de 'completed', `completed_at` é limpo
+
+**Funcionalidade Frontend**:
+- Checkbox para marcar como concluída
+- Badge de status colorido
+- Atualização instantânea das estatísticas
+- Animação de transição
+
+---
+
+#### RF-010: Deletar Tarefa
+**Endpoint**: `DELETE /api/tasks/:id`
+
+**Descrição**: Remove permanentemente uma tarefa.
+
+**Regras de Negócio**:
+- Tarefa deve pertencer ao usuário autenticado
+- Deleção é permanente (sem recuperação)
+
+**Funcionalidade Frontend**:
+- Botão com ícone de lixeira
+- Remoção instantânea da lista
+- Atualização das estatísticas
+- Feedback toast
+
+---
+
+#### RF-011: Obter Estatísticas
+**Endpoint**: `GET /api/tasks/statistics`
+
+**Descrição**: Retorna contadores e estatísticas das tarefas.
+
+**Dados de Saída**:
+- `total`: Total de tarefas
+- `pending`: Tarefas pendentes
+- `in_progress`: Tarefas em progresso
+- `completed`: Tarefas concluídas
+
+**Funcionalidade Frontend**:
+- Cards de estatísticas coloridos
+- Ícones representativos
+- Atualização automática após cada ação
+
+---
+
+#### RF-012: Limpar Tarefas Concluídas
+**Funcionalidade**: Frontend apenas
+
+**Descrição**: Remove todas as tarefas marcadas como concluídas.
+
+**Regras de Negócio**:
+- Executa múltiplas chamadas DELETE para cada tarefa concluída
+- Atualização da lista após remoção
+
+---
+
+### 3. Funcionalidades de Interface
+
+#### RF-013: Sistema de Temas (Dark/Light Mode)
+**Descrição**: Permite alternar entre tema claro e escuro.
+
+**Funcionalidade**:
+- Toggle no header
+- Ícone dinâmico (sol/lua)
+- Persistência da preferência (localStorage)
+- Transição suave entre temas
+
+---
+
+#### RF-014: Filtros de Tarefas
+**Descrição**: Permite filtrar tarefas por status.
+
+**Filtros Disponíveis**:
+- **Todas**: Mostra todas as tarefas
+- **Pendentes**: Apenas status 'pending'
+- **Em Progresso**: Apenas status 'in_progress'
+- **Concluídas**: Apenas status 'completed'
+
+---
+
+#### RF-015: Sistema de Notificações Toast
+**Descrição**: Feedback visual para ações do usuário.
+
+**Tipos de Notificação**:
+- **Sucesso**: Ações completadas (verde)
+- **Erro**: Falhas e erros (vermelho)
+- **Informação**: Mensagens informativas (azul)
+- **Aviso**: Alertas (amarelo)
+
+**Funcionalidade**:
+- Exibição temporária (3-5 segundos)
+- Auto-fechamento
+- Botão de fechar manual
+- Animação de entrada/saída
+
+---
+
+#### RF-016: Menu de Usuário
+**Descrição**: Menu dropdown com opções do usuário.
+
+**Itens do Menu**:
+- Nome do usuário
+- Email do usuário
+- Link para Configurações
+- Link para Início
+- Botão de Logout
+
+---
+
+#### RF-017: Página de Configurações
+**Descrição**: Interface para gerenciar perfil do usuário.
+
+**Funcionalidades**:
+- Visualização de dados atuais
+- Edição de nome e email
+- Alteração de senha
+- Validação de formulário
+- Confirmação de senha atual
+
+---
+
+#### RF-018: Responsividade
+**Descrição**: Interface adaptável a diferentes tamanhos de tela.
+
+**Breakpoints**:
+- **Mobile**: 320px - 480px
+- **Tablet**: 481px - 768px
+- **Desktop**: 769px+
+
+**Adaptações**:
+- Layout de coluna única em mobile
+- Grid adaptável
+- Fontes responsivas
+- Botões otimizados para touch
+
+---
+
+#### RF-019: Validação de Formulários
+**Descrição**: Validação em tempo real de campos de entrada.
+
+**Validações Aplicadas**:
+- Email: Formato válido
+- Senha: Mínimo 6 caracteres
+- Nome: Não vazio
+- Título: Máximo 200 caracteres
+- Feedback visual (bordas coloridas)
+- Mensagens de erro específicas
+
+---
+
+#### RF-020: Estado Vazio (Empty State)
+**Descrição**: Interface exibida quando não há tarefas.
+
+**Funcionalidade**:
+- Ilustração/ícone
+- Mensagem amigável
+- Call-to-action para criar primeira tarefa
+
+---
+
+#### RF-021: Persistência de Sessão
+**Descrição**: Manutenção da sessão do usuário.
+
+**Funcionalidade**:
+- Token JWT armazenado em localStorage
+- Verificação automática ao carregar páginas
+- Redirecionamento para login se não autenticado
+- Logout limpa todos os dados
+
+**Dados Armazenados**:
+- `authToken`: Token JWT
+- `userEmail`: Email do usuário
+- `userName`: Nome do usuário
+- `theme`: Preferência de tema
+
+---
+
+### 4. Segurança
+
+#### RF-022: Autenticação JWT
+**Descrição**: Sistema de autenticação baseado em tokens.
+
+**Características**:
+- Token gerado no login
+- Validade de 24 horas
+- Enviado no header `Authorization: Bearer <token>`
+- Verificação em todos os endpoints protegidos
+
+---
+
+#### RF-023: Hash de Senhas
+**Descrição**: Armazenamento seguro de senhas.
+
+**Características**:
+- Algoritmo: bcrypt
+- Nunca armazena senha em texto plano
+- Verificação hash durante login
+
+---
+
+#### RF-024: Isolamento de Dados
+**Descrição**: Garantia de privacidade dos dados.
+
+**Regras**:
+- Usuários acessam apenas suas próprias tarefas
+- Verificação de propriedade em todas as operações
+- Queries sempre filtradas por user_id
+
+---
+
+## 🔄 Fluxos de Uso Principais
+
+### Fluxo 1: Primeiro Acesso
+1. Usuário acessa a aplicação
+2. Sistema redireciona para `/login.html`
+3. Usuário clica em "Cadastre-se"
+4. Preenche formulário de registro
+5. Sistema cria conta e gera token
+6. Redireciona para `/index.html`
+7. Exibe estado vazio (sem tarefas)
+
+### Fluxo 2: Criar Tarefa
+1. Usuário digita título no input
+2. Pressiona Enter ou clica em adicionar
+3. Sistema valida entrada
+4. Envia POST para `/api/tasks`
+5. Backend cria tarefa no banco
+6. Frontend adiciona à lista
+7. Atualiza estatísticas
+8. Exibe toast de sucesso
+
+### Fluxo 3: Marcar como Concluída
+1. Usuário clica no checkbox
+2. Sistema envia PUT para `/api/tasks/:id/status`
+3. Backend atualiza status para 'completed'
+4. Frontend aplica estilos de concluída
+5. Atualiza contadores
+
+---
+
 ## 📝 Endpoints da API Usados
 
 ```
@@ -178,6 +585,7 @@ Auth:
 - POST   /api/auth/register    # Cadastrar
 - POST   /api/auth/login       # Login
 - GET    /api/auth/me          # Dados do usuário
+- PUT    /api/auth/profile     # Atualizar perfil
 
 Tasks:
 - GET    /api/tasks            # Listar todas

@@ -7,7 +7,7 @@ const API_CONFIG = {
     // Detecta automaticamente se está em produção ou desenvolvimento
     BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000/api'
-        : 'https://task-manager-gray-nine.vercel.app/', // ALTERE para sua URL da API na Vercel
+        : 'https://task-manager-k4onyhud7-abraao-santos-projects.vercel.app/api', // URL da Vercel
     
     // Endpoints
     ENDPOINTS: {
