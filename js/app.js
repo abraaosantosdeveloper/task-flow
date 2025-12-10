@@ -8,11 +8,18 @@ let currentFilter = 'all';
 let editingTaskId = null;
 
 // Elements (will be initialized after DOM loads)
-let taskForm, taskInput, taskDescriptionInput, tasksList, emptyState, filterTabs, clearCompletedBtn;
+let taskForm, taskInput, tasksList, emptyState, filterTabs, clearCompletedBtn;
 let userMenuBtn, userDropdown, themeToggle, toast, toastMessage, userEmailDisplay, userNameDisplay;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('App iniciado');
+    console.log('========================================');
+    console.log('🚀 App iniciado');
+    console.log('========================================');
+    const token = localStorage.getItem('authToken');
+    console.log('[App Init] Token no localStorage:', token ? `Presente (${token.substring(0, 30)}...)` : '❌ AUSENTE');
+    console.log('[App Init] UserEmail:', localStorage.getItem('userEmail') || '❌ AUSENTE');
+    console.log('[App Init] UserName:', localStorage.getItem('userName') || '❌ AUSENTE');
+    console.log('========================================');
     
     // Initialize elements
     taskForm = document.getElementById('taskForm');
@@ -31,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Elementos inicializados');
     
     // Check authentication
+    console.log('Verificando autenticação...');
     await checkAuth();
 
     // Load tasks from API
@@ -49,28 +57,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         try {
             const response = await API.getMe();
+            console.log('[CheckAuth] Response completa:', response);
+            console.log('[CheckAuth] response.data:', response.data);
             
-            if (response.success && response.data.user) {
-                console.log('Usuário autenticado:', response.data.user.email);
+            // A API retorna { success, message, data: { user: {...} } }
+            const userData = response.data?.data?.user || response.data?.user;
+            console.log('[CheckAuth] userData extraído:', userData);
+            
+            if (response.success && userData) {
+                console.log('[CheckAuth] ✅ Usuário autenticado:', userData.email);
                 
                 // Update user display
                 if (userEmailDisplay) {
-                    userEmailDisplay.textContent = response.data.user.email;
+                    userEmailDisplay.textContent = userData.email;
                 }
                 
                 // Update header user name if exists
                 const userName = document.querySelector('.user-name');
-                if (userName && response.data.user.name) {
-                    userName.textContent = response.data.user.name;
+                if (userName && userData.name) {
+                    userName.textContent = userData.name;
+                }
+            } else if (response.status === 401 || response.status === 403) {
+                // Token invalid or expired, logout
+                console.error('[CheckAuth] ❌ Token inválido ou expirado (401/403)');
+                console.error('[CheckAuth] Fazendo logout...');
+                logout();
+            } else if (response.status === 0) {
+                // Connection error - don't logout, show error
+                console.error('[CheckAuth] ⚠️ Erro de conexão - mantendo sessão');
+                showToast('Erro de conexão com o servidor', 'error');
+                // Use cached user info if available
+                const cachedEmail = localStorage.getItem('userEmail');
+                if (cachedEmail && userEmailDisplay) {
+                    userEmailDisplay.textContent = cachedEmail;
+                    console.log('[CheckAuth] Usando email em cache:', cachedEmail);
                 }
             } else {
-                // Token invalid, logout
-                console.log('Token inválido, fazendo logout...');
+                // Other error - logout
+                console.error('[CheckAuth] ❌ Erro desconhecido na autenticação');
+                console.error('[CheckAuth] Status:', response.status);
+                console.error('[CheckAuth] Fazendo logout...');
                 logout();
             }
         } catch (error) {
             console.error('Erro ao verificar autenticação:', error);
-            logout();
+            // Don't logout on network errors
+            showToast('Erro ao verificar autenticação', 'error');
         }
     }
 
@@ -133,24 +165,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Load Tasks from API
     async function loadTasks() {
+        console.log('[LoadTasks] Iniciando carregamento de tarefas...');
+        console.log('[LoadTasks] Token presente:', localStorage.getItem('authToken') ? 'SIM' : 'NÃO');
+        
         try {
             const response = await API.getTasks();
+            console.log('[LoadTasks] Resposta recebida:', {
+                success: response.success,
+                status: response.status,
+                hasData: !!response.data,
+                dataKeys: response.data ? Object.keys(response.data) : []
+            });
+            console.log('[LoadTasks] response.data completo:', response.data);
             
-            if (response.success && response.data.tasks) {
-                tasks = response.data.tasks;
-                console.log('Tarefas carregadas da API:', tasks.length);
+            // A API retorna { success: true, message: "Success", data: { tasks: [...] } }
+            // E API.request retorna { success, status, data: <response_json> }
+            // Então: response.data.data.tasks
+            const tasksData = response.data?.data?.tasks || response.data?.tasks || response.data?.data;
+            console.log('[LoadTasks] tasksData extraído:', tasksData);
+            console.log('[LoadTasks] É array?', Array.isArray(tasksData));
+            
+            if (response.success && tasksData) {
+                tasks = tasksData;
+                console.log('[LoadTasks] ✅ Tarefas carregadas:', tasks.length);
                 renderTasks();
             } else {
-                console.error('Erro ao carregar tarefas:', response.data.message);
+                console.error('[LoadTasks] ❌ Erro ao carregar tarefas');
+                console.error('[LoadTasks] Status:', response.status);
+                console.error('[LoadTasks] Message:', response.data?.message);
+                
                 if (response.status === 401) {
+                    console.error('[LoadTasks] Token inválido ou expirado (401)');
+                    console.error('[LoadTasks] Fazendo logout...');
                     logout();
                 } else {
-                    showToast(`Erro ao carregar tarefas: ${getStatusMessage(response.status)}`, 'error');
+                    showToast(getErrorMessage(response), 'error');
                 }
             }
         } catch (error) {
-            console.error('Erro ao carregar tarefas:', error);
-            showToast('Erro ao conectar com o servidor', 'error');
+            console.error('[LoadTasks] Exceção ao carregar tarefas:', error);
+            showToast('Erro na aplicação (500)', 'error');
         }
     }
     
@@ -169,20 +223,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         try {
-            const response = await API.createTask(title, '', 'pending');
+            const response = await API.createTask(title, 'pending');
             
-            if (response.success && response.data.task) {
-                tasks.unshift(response.data.task);
+            // A API retorna { success, message, data: { task: {...} } }
+            const taskData = response.data?.data?.task || response.data?.task;
+            
+            if (response.success && taskData) {
+                tasks.unshift(taskData);
                 renderTasks();
                 taskInput.value = '';
                 showToast('Tarefa adicionada com sucesso!', 'success');
             } else {
-                console.error('Erro ao criar tarefa:', response.data.message);
-                showToast(`Erro: ${response.status} (${getStatusMessage(response.status)})`, 'error');
+                console.error('Erro ao criar tarefa:', response.data?.message);
+                showToast(getErrorMessage(response), 'error');
             }
         } catch (error) {
             console.error('Erro ao criar tarefa:', error);
-            showToast('Erro: 500 (Internal Server Error)', 'error');
+            showToast('Erro na aplicação (500)', 'error');
         } finally {
             // Remove loading
             if (submitButton) {
@@ -201,6 +258,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         try {
             const response = await API.updateTaskStatus(id, newStatus);
+            console.log('[ToggleTask] Response:', response);
             
             if (response.success) {
                 // Update local task
@@ -211,12 +269,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const message = newStatus === 'completed' ? 'Tarefa concluída!' : 'Tarefa reaberta!';
                 showToast(message, 'success');
             } else {
-                console.error('Erro ao atualizar status:', response.data.message);
-                showToast(`Erro: ${response.status} (${getStatusMessage(response.status)})`, 'error');
+                console.error('[ToggleTask] Erro:', response.data?.message);
+                showToast(getErrorMessage(response), 'error');
             }
         } catch (error) {
             console.error('Erro ao atualizar tarefa:', error);
-            showToast('Erro: 500 (Internal Server Error)', 'error');
+            showToast('Erro na aplicação (500)', 'error');
         }
     }
 
@@ -228,18 +286,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         try {
             const response = await API.deleteTask(id);
+            console.log('[DeleteTask] Response:', response);
             
             if (response.success) {
                 tasks = tasks.filter(t => t.id !== id);
                 renderTasks();
                 showToast('Tarefa removida!', 'success');
             } else {
-                console.error('Erro ao excluir tarefa:', response.data.message);
-                showToast(`Erro: ${response.status} (${getStatusMessage(response.status)})`, 'error');
+                console.error('[DeleteTask] Erro:', response.data?.message);
+                showToast(getErrorMessage(response), 'error');
             }
         } catch (error) {
             console.error('Erro ao excluir tarefa:', error);
-            showToast('Erro: 500 (Internal Server Error)', 'error');
+            showToast('Erro na aplicação (500)', 'error');
         }
     }
     
@@ -268,7 +327,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!task) return;
             
             try {
-                const response = await API.updateTask(id, newTitle, task.description || '', task.status);
+                const response = await API.updateTask(id, newTitle, task.status);
+                console.log('[EditTask] Response:', response);
                 
                 if (response.success) {
                     task.title = newTitle;
@@ -277,8 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     editBtn.innerHTML = '<i class="bx bx-edit"></i>';
                     showToast('Tarefa atualizada!', 'success');
                 } else {
-                    console.error('Erro ao atualizar tarefa:', response.data.message);
-                    showToast(`Erro: ${response.status} (${getStatusMessage(response.status)})`, 'error');
+                    console.error('[EditTask] Erro:', response.data?.message);
+                    showToast(getErrorMessage(response), 'error');
                     // Restore original text
                     taskText.textContent = task.title;
                     taskText.contentEditable = 'false';
@@ -286,8 +346,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     editBtn.innerHTML = '<i class="bx bx-edit"></i>';
                 }
             } catch (error) {
-                console.error('Erro ao atualizar tarefa:', error);
-                showToast('Erro: 500 (Internal Server Error)', 'error');
+                console.error('[EditTask] Exception:', error);
+                showToast('Erro na aplicação (500)', 'error');
             }
         } else {
             // Enter edit mode
@@ -527,7 +587,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function getTimeAgo(dateString) {
-        const date = new Date(dateString);
+        if (!dateString) {
+            return 'Agora mesmo';
+        }
+        
+        let date;
+        
+        // Try parsing different date formats
+        // 1. GMT format: "Wed, 10 Dec 2025 02:42:52 GMT"
+        // 2. MySQL format: "2025-12-10 02:26:32"
+        // 3. ISO format: "2025-12-10T02:26:32"
+        
+        if (dateString.includes('GMT')) {
+            // GMT format from HTTP headers
+            date = new Date(dateString);
+        } else if (dateString.includes(' ') && !dateString.includes('T')) {
+            // MySQL datetime format - convert to ISO
+            const isoString = dateString.replace(' ', 'T');
+            date = new Date(isoString);
+        } else {
+            // ISO or other standard formats
+            date = new Date(dateString);
+        }
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.error('Invalid date:', dateString);
+            return 'Data inválida';
+        }
+        
         const now = new Date();
         const seconds = Math.floor((now - date) / 1000);
         

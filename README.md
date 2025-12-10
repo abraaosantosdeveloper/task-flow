@@ -30,34 +30,86 @@ task-app/
 
 ## ⚙️ Configuração da API
 
-Edite `js/config.js` para configurar a URL da API:
+A URL da API é detectada automaticamente:
+- **Desenvolvimento**: `http://localhost:5000/api`
+- **Produção (GitHub Pages)**: `https://sua-api.vercel.app/api`
+
+Para alterar a URL de produção, edite `js/config.js` linha 8:
 
 ```javascript
-const API_CONFIG = {
-    BASE_URL: 'http://localhost:5000/api',  // Altere para sua URL
-    // ...
-};
+BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000/api'
+    : 'https://SUA-API-AQUI.vercel.app/api', // ALTERE AQUI
 ```
 
 ## 🎯 Como usar
 
-### 1. **Inicie a API**
+### Desenvolvimento Local
+
+#### 1. **Inicie a API**
 ```bash
 cd ~/Task_manager
 python index.py
 ```
 
-### 2. **Abra o frontend**
+#### 2. **Abra o frontend**
 ```bash
 cd ~/task-app
 # Abra login.html em um navegador ou use um servidor local
 python -m http.server 8000
 ```
 
-### 3. **Acesse**
+#### 3. **Acesse**
 - Abra: `http://localhost:8000/login.html`
 - Crie uma conta ou faça login
 - Comece a gerenciar suas tarefas!
+
+---
+
+### 🌐 Deploy no GitHub Pages
+
+#### Passo 1: Configure a URL da API
+No arquivo `js/config.js` (linha 8), altere para a URL da sua API na Vercel:
+
+```javascript
+: 'https://sua-api-vercel.vercel.app/api', // ALTERE AQUI
+```
+
+#### Passo 2: Publique no GitHub
+
+```bash
+cd task-app
+git init
+git add .
+git commit -m "Deploy frontend"
+git branch -M main
+git remote add origin https://github.com/SEU-USUARIO/task-app.git
+git push -u origin main
+```
+
+#### Passo 3: Ative o GitHub Pages
+1. Vá em **Settings** → **Pages**
+2. Em **Source**, selecione: **main** branch
+3. Clique em **Save**
+4. Aguarde 2-3 minutos
+
+#### Passo 4: Acesse seu app
+```
+https://SEU-USUARIO.github.io/task-app/login.html
+```
+
+#### ⚠️ Importante: Configure CORS no Backend
+No arquivo `index.py` do backend, adicione a URL do GitHub Pages:
+
+```python
+CORS(app, 
+     resources={r"/*": {"origins": [
+         "http://localhost:*",
+         "https://SEU-USUARIO.github.io"
+     ]}})
+```
+
+Depois faça deploy do backend novamente na Vercel.
 
 ## 📱 Responsividade
 

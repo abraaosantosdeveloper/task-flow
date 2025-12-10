@@ -944,9 +944,9 @@ body {
 /* Toast Notification */
 .toast {
     position: fixed;
-    bottom: var(--spacing-lg);
+    top: var(--spacing-lg);
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(-100px);
     background: var(--gray-900);
     color: var(--white);
     padding: var(--spacing-md) var(--spacing-lg);
@@ -1229,7 +1229,7 @@ body {
     
     /* Toast */
     .toast {
-        bottom: var(--spacing-md);
+        top: var(--spacing-md);
         padding: var(--spacing-sm) var(--spacing-md);
         min-width: 240px;
         max-width: calc(100% - 1.5rem);
@@ -1343,5 +1343,149 @@ body {
     
     .logo-small span {
         font-size: 1.5rem;
+    }
+}
+
+/* ============================================
+   Settings Page Styles
+   ============================================ */
+.settings-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow);
+}
+
+.settings-header {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.settings-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.settings-header p {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.settings-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.settings-actions .btn-primary,
+.settings-actions .btn-secondary {
+    flex: 1;
+    min-width: 150px;
+}
+
+.account-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.info-item i {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-top: 0.25rem;
+}
+
+.info-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-item strong {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.info-item span {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ============================================
+   Settings Page - Responsive
+   ============================================ */
+@media (max-width: 379px) {
+    .settings-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .settings-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+    }
+    
+    .settings-actions .btn-primary,
+    .settings-actions .btn-secondary {
+        width: 100%;
+    }
+    
+    .info-item {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .info-item i {
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .account-info {
+        flex-direction: row;
+    }
+    
+    .info-item {
+        flex: 1;
+    }
+    
+    .settings-actions {
+        justify-content: flex-end;
+    }
+    
+    .settings-actions .btn-primary,
+    .settings-actions .btn-secondary {
+        flex: 0;
+        min-width: 180px;
     }
 }

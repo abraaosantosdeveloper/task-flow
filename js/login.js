@@ -160,13 +160,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await API.login(email, password);
             
             if (response.success) {
+                console.log('[Login] Response completa:', response);
+                console.log('[Login] response.data:', response.data);
+                console.log('[Login] response.data.data:', response.data.data);
+                
+                // A API retorna { success, message, data: { token, user } }
+                // Então precisamos acessar response.data.data
+                const loginData = response.data.data || response.data;
+                console.log('[Login] loginData extraído:', loginData);
+                
                 // Store token and user data
-                if (response.data.token) {
-                    localStorage.setItem('authToken', response.data.token);
+                if (loginData && loginData.token) {
+                    localStorage.setItem('authToken', loginData.token);
+                    console.log('[Login] ✅ Token armazenado:', loginData.token.substring(0, 20) + '...');
+                } else {
+                    console.error('[Login] ❌ Token não encontrado na resposta!');
+                    console.error('[Login] loginData:', loginData);
                 }
-                if (response.data.user) {
-                    localStorage.setItem('userName', response.data.user.name);
-                    localStorage.setItem('userEmail', response.data.user.email);
+                
+                if (loginData && loginData.user) {
+                    localStorage.setItem('userName', loginData.user.name);
+                    localStorage.setItem('userEmail', loginData.user.email);
+                    console.log('[Login] ✅ Dados do usuário armazenados:', loginData.user.email);
+                } else {
+                    console.error('[Login] ❌ Dados do usuário não encontrados!');
                 }
                 
                 // Save remember me preference
@@ -179,27 +196,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.removeItem('savedEmail');
                 }
                 
+                // Verify token was saved
+                const savedToken = localStorage.getItem('authToken');
+                console.log('Token verification:', savedToken ? 'Token saved successfully' : 'ERROR: Token not saved!');
+                
                 showToast('Login realizado com sucesso!', 'success');
                 
-                // Redirect after 1 second
+                // Redirect after 1.5 seconds to ensure localStorage is updated
                 setTimeout(() => {
+                    console.log('Redirecting to index.html...');
                     window.location.href = 'index.html';
-                }, 1000);
+                }, 1500);
                 
             } else {
                 // Handle errors
-                let errorMessage = 'Login falhou';
+                const errorMessage = getErrorMessage(response);
                 
                 if (response.status === 401) {
-                    errorMessage = 'E-mail ou senha incorretos';
                     showError(emailInput, emailError, 'Credenciais inválidas');
                     showError(passwordInput, passwordError, 'Credenciais inválidas');
-                } else if (response.status === 400 || response.status === 422) {
-                    errorMessage = response.data.message || 'Dados inválidos';
-                } else if (response.status === 0) {
-                    errorMessage = 'Erro de conexão com o servidor';
-                } else {
-                    errorMessage = `Erro: ${response.status} (${getStatusMessage(response.status)})`;
                 }
                 
                 showToast(errorMessage, 'error');
@@ -211,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error('Login error:', error);
-            showToast('Erro: 500 (Internal Server Error)', 'error');
+            showToast('Erro na aplicação (500)', 'error');
             
             // Re-enable button
             submitButton.disabled = false;

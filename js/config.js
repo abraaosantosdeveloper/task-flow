@@ -4,15 +4,18 @@
 
 const API_CONFIG = {
     // Base URL da API
-    // Para produção, altere para: 'https://sua-api.vercel.app/api'
-    BASE_URL: 'http://localhost:5000/api',
+    // Detecta automaticamente se está em produção ou desenvolvimento
+    BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:5000/api'
+        : 'https://sua-api.vercel.app/api', // ALTERE para sua URL da API na Vercel
     
     // Endpoints
     ENDPOINTS: {
         AUTH: {
             LOGIN: '/auth/login',
             REGISTER: '/auth/register',
-            ME: '/auth/me'
+            ME: '/auth/me',
+            PROFILE: '/auth/profile'
         },
         TASKS: {
             BASE: '/tasks',
@@ -31,8 +34,13 @@ const API_CONFIG = {
         };
         
         const token = localStorage.getItem('authToken');
+        console.log('[API Config] Token no localStorage:', token ? `${token.substring(0, 20)}...` : 'AUSENTE');
+        
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
+            console.log('[API Config] Header Authorization configurado');
+        } else {
+            console.warn('[API Config] AVISO: Token não encontrado, requisição sem autenticação!');
         }
         
         return headers;
@@ -59,6 +67,10 @@ class API {
         try {
             const response = await fetch(url, config);
             const data = await response.json();
+            
+            console.log(`[API Request] ${options.method || 'GET'} ${endpoint}`);
+            console.log('[API Request] Response status:', response.status);
+            console.log('[API Request] Response data:', data);
             
             return {
                 success: response.ok,
@@ -94,6 +106,18 @@ class API {
         return this.request(API_CONFIG.ENDPOINTS.AUTH.ME);
     }
     
+    static async updateProfile(name, email, currentPassword, newPassword) {
+        const body = { name, email };
+        if (currentPassword && newPassword) {
+            body.current_password = currentPassword;
+            body.new_password = newPassword;
+        }
+        return this.request(API_CONFIG.ENDPOINTS.AUTH.PROFILE, {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        });
+    }
+    
     // Task endpoints
     static async getTasks() {
         return this.request(API_CONFIG.ENDPOINTS.TASKS.BASE);
@@ -103,17 +127,17 @@ class API {
         return this.request(API_CONFIG.ENDPOINTS.TASKS.BY_ID(id));
     }
     
-    static async createTask(title, description, status = 'pending') {
+    static async createTask(title, status = 'pending') {
         return this.request(API_CONFIG.ENDPOINTS.TASKS.BASE, {
             method: 'POST',
-            body: JSON.stringify({ title, description, status })
+            body: JSON.stringify({ title, status })
         });
     }
     
-    static async updateTask(id, title, description, status) {
+    static async updateTask(id, title, status) {
         return this.request(API_CONFIG.ENDPOINTS.TASKS.BY_ID(id), {
             method: 'PUT',
-            body: JSON.stringify({ title, description, status })
+            body: JSON.stringify({ title, status })
         });
     }
     
@@ -155,4 +179,39 @@ const HTTP_STATUS = {
 
 function getStatusMessage(status) {
     return HTTP_STATUS[status] || `Erro desconhecido (${status})`;
+}
+
+// ============================================
+// Error Message Handler
+// ============================================
+
+function getErrorMessage(response) {
+    // Se houver mensagem específica do backend (erros de validação, etc)
+    const backendMessage = response.data?.message || response.data?.data?.message;
+    
+    if (backendMessage) {
+        // Lista de mensagens que devem ser mostradas completas
+        const specificErrors = [
+            'senha incorreta',
+            'credenciais inválidas',
+            'usuário não encontrado',
+            'email já cadastrado',
+            'senha atual incorreta',
+            'token inválido',
+            'sessão expirada',
+            'tarefa não encontrada',
+            'título é obrigatório',
+            'status inválido'
+        ];
+        
+        const lowerMessage = backendMessage.toLowerCase();
+        
+        // Verifica se é um erro específico que deve ser mostrado
+        if (specificErrors.some(err => lowerMessage.includes(err))) {
+            return backendMessage;
+        }
+    }
+    
+    // Para outros erros, retorna mensagem genérica com código
+    return `Erro na aplicação (${response.status})`;
 }

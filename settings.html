@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Task App</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- ============================================
+         App Header
+         ============================================ -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-small">
+                <i class='bx bx-task'></i>
+                <span>Task Flow</span>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn-icon" id="themeToggle" aria-label="Alternar tema">
+                    <i class='bx bx-moon'></i>
+                </button>
+                
+                <div class="user-menu">
+                    <button class="user-avatar" id="userMenuBtn" aria-label="Menu do usuário">
+                        <i class='bx bx-user'></i>
+                    </button>
+                    
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info">
+                            <p class="user-name" id="userName">Usuário</p>
+                            <p class="user-email" id="userEmail">email@exemplo.com</p>
+                        </div>
+                        
+                        <hr>
+                        
+                        <a href="index.html" class="dropdown-item">
+                            <i class='bx bx-home-alt'></i>
+                            <span>Início</span>
+                        </a>
+                        
+                        <a href="settings.html" class="dropdown-item">
+                            <i class='bx bx-cog'></i>
+                            <span>Configurações</span>
+                        </a>
+                        
+                        <hr>
+                        
+                        <a href="#" class="dropdown-item logout">
+                            <i class='bx bx-log-out'></i>
+                            <span>Sair</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+         Settings Main Content
+         ============================================ -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="welcome-section">
+                <h1 class="page-title">
+                    <i class='bx bx-cog'></i>
+                    Configurações
+                </h1>
+                <p class="page-subtitle">Gerencie suas informações pessoais e preferências</p>
+            </div>
+
+            <!-- Settings Form -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h2>Informações Pessoais</h2>
+                    <p>Atualize seu nome, e-mail e senha</p>
+                </div>
+
+                <form id="settingsForm" class="settings-form">
+                    <!-- Name -->
+                    <div class="form-group">
+                        <label for="name">
+                            <i class='bx bx-user'></i>
+                            Nome Completo
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="Seu nome completo"
+                            required
+                        >
+                        <span class="error-message" id="nameError"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email">
+                            <i class='bx bx-envelope'></i>
+                            E-mail
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="seu@email.com"
+                            required
+                        >
+                        <span class="error-message" id="emailError"></span>
+                    </div>
+
+                    <div class="divider">
+                        <span>Alterar Senha (Opcional)</span>
+                    </div>
+
+                    <!-- Current Password -->
+                    <div class="form-group">
+                        <label for="currentPassword">
+                            <i class='bx bx-lock-alt'></i>
+                            Senha Atual
+                        </label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="currentPassword" 
+                                name="currentPassword" 
+                                placeholder="Digite sua senha atual"
+                            >
+                            <button type="button" class="toggle-password" id="toggleCurrentPassword">
+                                <i class='bx bx-show'></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="currentPasswordError"></span>
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="form-group">
+                        <label for="newPassword">
+                            <i class='bx bx-lock-open-alt'></i>
+                            Nova Senha
+                        </label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="newPassword" 
+                                name="newPassword" 
+                                placeholder="Mínimo 8 caracteres"
+                            >
+                            <button type="button" class="toggle-password" id="toggleNewPassword">
+                                <i class='bx bx-show'></i>
+                            </button>
+                        </div>
+                        <div class="password-requirements">
+                            <small><i class='bx bx-info-circle'></i> Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial</small>
+                        </div>
+                        <span class="error-message" id="newPasswordError"></span>
+                    </div>
+
+                    <!-- Confirm New Password -->
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class='bx bx-check-shield'></i>
+                            Confirmar Nova Senha
+                        </label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                name="confirmPassword" 
+                                placeholder="Digite a nova senha novamente"
+                            >
+                            <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                                <i class='bx bx-show'></i>
+                            </button>
+                        </div>
+                        <span class="error-message" id="confirmPasswordError"></span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="settings-actions">
+                        <button type="button" class="btn-secondary" id="cancelBtn">
+                            <i class='bx bx-x'></i>
+                            <span>Cancelar</span>
+                        </button>
+                        <button type="submit" class="btn-primary btn-save">
+                            <i class='bx bx-save'></i>
+                            <span>Salvar Alterações</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Info -->
+            <div class="settings-card">
+                <div class="settings-header">
+                    <h2>Informações da Conta</h2>
+                    <p>Detalhes sobre sua conta</p>
+                </div>
+                <div class="account-info">
+                    <div class="info-item">
+                        <i class='bx bx-calendar'></i>
+                        <div>
+                            <strong>Membro desde</strong>
+                            <span id="memberSince">Carregando...</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class='bx bx-shield-alt-2'></i>
+                        <div>
+                            <strong>ID da Conta</strong>
+                            <span id="accountId">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ============================================
+         Footer
+         ============================================ -->
+    <footer class="app-footer">
+        <p>
+            Feito com <i class='bx bxs-heart'></i> por Task App Team
+        </p>
+    </footer>
+
+    <!-- ============================================
+         Toast Notification
+         ============================================ -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class='bx bx-check-circle'></i>
+            <span id="toastMessage">Mensagem</span>
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class='bx bx-x'></i>
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

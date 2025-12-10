@@ -210,19 +210,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await API.register(name, email, password);
             
             if (response.success) {
+                console.log('[Register] Response completa:', response);
+                console.log('[Register] response.data:', response.data);
+                console.log('[Register] response.data.data:', response.data.data);
+                
+                // A API retorna { success, message, data: { token, user } }
+                // Então precisamos acessar response.data.data
+                const registerData = response.data.data || response.data;
+                console.log('[Register] registerData extraído:', registerData);
+                
                 // Store token and user data
-                if (response.data.token) {
-                    localStorage.setItem('authToken', response.data.token);
+                if (registerData && registerData.token) {
+                    localStorage.setItem('authToken', registerData.token);
+                    console.log('[Register] ✅ Token armazenado:', registerData.token.substring(0, 20) + '...');
+                } else {
+                    console.error('[Register] ❌ Token não encontrado na resposta!');
+                    console.error('[Register] registerData:', registerData);
                 }
-                if (response.data.user) {
-                    localStorage.setItem('userName', response.data.user.name);
-                    localStorage.setItem('userEmail', response.data.user.email);
+                
+                if (registerData && registerData.user) {
+                    localStorage.setItem('userName', registerData.user.name);
+                    localStorage.setItem('userEmail', registerData.user.email);
+                    console.log('[Register] ✅ Dados do usuário armazenados:', registerData.user.email);
+                } else {
+                    console.error('[Register] ❌ Dados do usuário não encontrados!');
                 }
+                
+                // Verify token was saved
+                const savedToken = localStorage.getItem('authToken');
+                console.log('[Register] Token verification:', savedToken ? '✅ Token saved successfully' : '❌ ERROR: Token not saved!');
                 
                 showToast('Cadastro realizado com sucesso!', 'success');
                 
-                // Redirect after 1.5 seconds
+                // Redirect after 1.5 seconds to ensure localStorage is updated
                 setTimeout(() => {
+                    console.log('Redirecting to index.html...');
                     window.location.href = 'index.html';
                 }, 1500);
                 
