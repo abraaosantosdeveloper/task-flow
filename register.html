@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskFlow - Cadastre-se">
+    <title>Cadastro - TaskFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class='bx bx-check-square'></i>
+                    <h1>TaskFlow</h1>
+                </div>
+                <p class="subtitle">Crie sua conta e organize suas tarefas</p>
+            </div>
+
+            <form id="registerForm" class="login-form" novalidate>
+                <div class="form-group">
+                    <label for="name">
+                        <i class='bx bx-user'></i>
+                        Nome completo
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name"
+                        placeholder="Seu nome completo"
+                        required
+                        autocomplete="name"
+                    >
+                    <span class="error-message" id="nameError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        <i class='bx bx-envelope'></i>
+                        E-mail
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        placeholder="seu@email.com"
+                        required
+                        autocomplete="email"
+                    >
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">
+                        <i class='bx bx-lock-alt'></i>
+                        Senha
+                    </label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            placeholder="Digite sua senha"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="toggle-password" id="togglePassword" aria-label="Mostrar senha">
+                            <i class='bx bx-show'></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError"></span>
+                    <div class="password-requirements">
+                        <small>
+                            <i class='bx bx-info-circle'></i>
+                            Mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">
+                        <i class='bx bx-lock-alt'></i>
+                        Confirmar senha
+                    </label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword"
+                            placeholder="Confirme sua senha"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Mostrar senha">
+                            <i class='bx bx-show'></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
+
+                <button type="submit" class="btn-primary btn-register">
+                    <span>Criar conta</span>
+                    <i class='bx bx-right-arrow-alt'></i>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p>Já tem uma conta? <a href="login.html" class="signup-link">Fazer login</a></p>
+            </div>
+        </div>
+
+        <div class="login-illustration">
+            <div class="illustration-content">
+                <i class='bx bx-user-plus'></i>
+                <h2>Junte-se a nós!</h2>
+                <p>Crie sua conta e comece a organizar suas tarefas de forma simples e eficiente</p>
+                <div class="features">
+                    <div class="feature">
+                        <i class='bx bx-check-circle'></i>
+                        <span>Totalmente gratuito</span>
+                    </div>
+                    <div class="feature">
+                        <i class='bx bx-check-circle'></i>
+                        <span>Interface intuitiva</span>
+                    </div>
+                    <div class="feature">
+                        <i class='bx bx-check-circle'></i>
+                        <span>Acesse de qualquer lugar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class='bx bx-check-circle'></i>
+            <span id="toastMessage">Mensagem</span>
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class='bx bx-x'></i>
+        </button>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/register.js"></script>
+</body>
+</html>

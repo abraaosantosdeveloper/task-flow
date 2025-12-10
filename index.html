@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskFlow - Gerenciador de Tarefas">
+    <title>Minhas Tarefas - TaskFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="app-page">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-small">
+                <i class='bx bx-check-square'></i>
+                <span>TaskFlow</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="themeToggle" aria-label="Alternar tema">
+                    <i class='bx bx-moon'></i>
+                </button>
+                <div class="user-menu">
+                    <button class="user-avatar" id="userMenuBtn" aria-label="Menu do usuário">
+                        <i class='bx bx-user-circle'></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-info">
+                            <p class="user-name">Usuário</p>
+                            <p class="user-email" id="userEmail">usuario@email.com</p>
+                        </div>
+                        <hr>
+                        <a href="#" class="dropdown-item">
+                            <i class='bx bx-cog'></i>
+                            Configurações
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class='bx bx-help-circle'></i>
+                            Ajuda
+                        </a>
+                        <a href="login.html" class="dropdown-item logout">
+                            <i class='bx bx-log-out'></i>
+                            Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <h1 class="page-title">Minhas Tarefas</h1>
+                <p class="page-subtitle">Organize seu dia com eficiência</p>
+            </section>
+
+            <!-- Stats Cards -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <i class='bx bx-list-ul'></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value" id="totalTasks">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pending">
+                            <i class='bx bx-time'></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Pendentes</span>
+                            <span class="stat-value" id="pendingTasks">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon completed">
+                            <i class='bx bx-check-circle'></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Concluídas</span>
+                            <span class="stat-value" id="completedTasks">0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Task Input -->
+            <section class="task-input-section">
+                <form id="taskForm" class="task-form">
+                    <div class="input-wrapper">
+                        <i class='bx bx-plus-circle'></i>
+                        <input 
+                            type="text" 
+                            id="taskInput" 
+                            placeholder="Adicionar nova tarefa..."
+                            maxlength="100"
+                            required
+                        >
+                        <button type="submit" class="btn-add" aria-label="Adicionar tarefa">
+                            <i class='bx bx-send'></i>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Filter Tabs -->
+            <section class="filter-section">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">
+                        <i class='bx bx-list-ul'></i>
+                        Todas
+                    </button>
+                    <button class="filter-tab" data-filter="pending">
+                        <i class='bx bx-time'></i>
+                        Pendentes
+                    </button>
+                    <button class="filter-tab" data-filter="completed">
+                        <i class='bx bx-check-circle'></i>
+                        Concluídas
+                    </button>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn-clear" id="clearCompleted">
+                        <i class='bx bx-trash'></i>
+                        Limpar concluídas
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tasks List -->
+            <section class="tasks-section">
+                <div id="tasksList" class="tasks-list">
+                    <!-- Tasks will be inserted here by JavaScript -->
+                </div>
+                <div class="empty-state" id="emptyState">
+                    <i class='bx bx-task'></i>
+                    <h3>Nenhuma tarefa encontrada</h3>
+                    <p>Adicione sua primeira tarefa acima para começar</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2025 TaskFlow. Feito com <i class='bx bx-heart'></i></p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <i class='bx bx-check-circle'></i>
+            <span id="toastMessage">Tarefa adicionada com sucesso!</span>
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class='bx bx-x'></i>
+        </button>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
